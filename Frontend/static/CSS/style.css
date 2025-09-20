@@ -1,0 +1,77 @@
+/* body{
+  background-image:url("../assets/HomePageBackground.jpeg");
+  background-size: cover;
+} */
+.main{
+  position:fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../assets/HomePageBackground.jpeg') no-repeat center center;
+  background-size: cover;
+  z-index: -1; /* Ensures the background doesn't overlap other content */
+}
+.main-div{
+  position:fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #add8e6;
+  z-index: -1; /* Ensures the background doesn't overlap other content */
+}
+
+/* To avoid navbar overflow issues */
+    .navbar-collapse {
+    overflow: visible !important; /* if there is horizontal scroll bar hidden or        vertical hidden it is overflowing navbar by including in navbar according to scrollbar hidden*/
+  }
+  
+  
+  
+/* nav-bar userdropdown  */
+.dropdown-menu{
+    min-width: auto;
+    padding:0.3rem 0.7rem;
+}
+.dropdown-menu-end {
+    right: 0;
+    left: auto;
+    top: 100%; /*to place dropdown below menu*/
+    
+  }
+/* if dropdown is  empty don't display  */
+.navbar .dropdown-menu:empty {  
+    display: none;
+  }
+
+  /* navbar */
+
+  .navbar-brand{
+    font-weight: bold;
+  }
+  .navbar {
+    overflow: visible;
+    padding-bottom: 0;
+    background-color:#3CB371 !important;
+  }
+
+
+
+  .navbar-nav .nav-link{
+    color: white;
+    font-weight: 400;
+  }
+
+  .navbar-nav .nav-link:hover{
+    font-weight: 600;
+  }
+  /* Home page quote */
+  .quote p{
+    color:rgba(255, 17, 0, 0.842);
+    font-weight: 500;
+    
+  }
+
+  
+  /* Registration form */

@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register </title>
+    <link rel="icon" href="{% static 'assets/logo.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
+    <style>
+        .card{
+            width: 100%;
+            max-width: 700px;
+            overflow: auto;
+            max-height: 90vh;
+            padding: 2rem;
+        }
+        .card::-webkit-scrollbar {
+            display: none; /* Hides the scrollbar */ 
+        }
+        
+        h3{
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-div">
+      <div class="container vh-100  d-flex justify-content-center align-items-center " style="width:100vw;background-color:#add8e6;">
+        <div class="card  p-5 mt-2  registration-form rounded-3">
+            <h3 class="text-center">Register</h3>
+             <!-- Display Messages (Error, Success) -->
+              {% if messages %}
+                <div class="container">
+                  {% for message in messages %}
+                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                         {{ message }}
+                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                     </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+            <form id="registrationForm" action="{% url 'register' %}" method="POST">
+              {% csrf_token %}
+              <!-- Name -->
+              <div class="form-group p-2">
+                <label for="name" class="m-2">Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
+                <small id="nameError" class="text-danger"></small> <!--for error message-->
+              </div>
+              
+              <!-- Email -->
+              <div class="form-group p-2">
+                <label for="email" class="m-2">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email"  required>
+                <small id="emailError" class="form-text text-danger"></small>  
+              </div>
+          
+              <!-- Password -->
+              <div class="form-group p-2">
+                <label for="password" class="m-2">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                <small id="passwordError" class="form-text text-danger"></small> 
+              </div>
+              <div class="form-group p-2">
+                <label for="confirm_password" class="m-2">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm password" required>
+                <small id="confirmPasswordError" class="form-text text-danger"></small>
+              </div>
+              <!-- Age -->
+              <div class="form-group p-2">
+                <label for="age" class="m-2">Age</label>
+                <input type="number" class="form-control" id="age" name="age" placeholder="Enter your age" min="10" max="100" required> 
+                <small id="ageError" class="form-text text-danger"></small>
+              </div>
+              {% comment %} Weight {% endcomment %}
+              <div class="form-group p-2">
+                <label for="weight" class="m-2">Weight</label>
+                <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter your Weight" min="0" required> 
+                <small id="weightError" class="form-text text-danger"></small>
+              </div>
+              
+              <!-- Gender -->
+              <div class="form-group p-2">
+                <label for="gender" class="m-2">Gender</label>
+                <select class="form-control" id="gender" name="gender" required>
+                  <option selected disabled value="">Select Gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+          
+              <!-- Activity Level -->
+              <div class="form-group p-2 m-2">
+                <label for="activity" class="m-2">Activity Level</label>
+                <select class="form-control" id="activity" name="activity_level" required>
+                  <option selected disabled value="">Select Activity Level</option>
+                  <option title="Little or no exercise, sitting most of the day">Sedentary</option>
+                  
+                  <option title="Light exercise or sports 1-3 days per week">Lightly Active</option>
+
+                  <option title="Moderate exercise or sports 3-5 days per week">Moderately Active</option>
+                  
+                  <option title="Hard exercise or sports 6-7 days per week">Very Active</option>
+                </select>
+              </div>
+          
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-primary btn-block m-2" id="register">Register</button>
+            </form>
+        </div>
+    </div>
+    </div>
+    <script src="{% static 'JS/app.js' %}"></script>
+</body>
+</html>
