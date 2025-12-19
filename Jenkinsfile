@@ -79,13 +79,11 @@ spec:
                 }
             }
         }
-        }
 
         stage('Login & Push to Nexus') {
             steps {
                 container('dind') {
                     sh 'sleep 10'
-                    // Using the exact credentials you provided
                     sh 'docker login $REGISTRY_URL -u student -p Imcc@2025'
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
