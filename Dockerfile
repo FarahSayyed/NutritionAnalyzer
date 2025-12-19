@@ -24,4 +24,4 @@ EXPOSE 8000
 
 # Start the app
 # Ensure 'Nutrition_Analyzing_Website' matches the folder name where settings.py and wsgi.py live
-CMD python manage.py migrate && gunicorn Nutrition_Analyzing_Website.wsgi:application --bind 0.0.0.0:8000 --chdir /app
+CMD ["sh", "-c", "python manage.py migrate && gunicorn Nutrition_Analyzing_Website.wsgi:application --bind 0.0.0.0:8000"]
