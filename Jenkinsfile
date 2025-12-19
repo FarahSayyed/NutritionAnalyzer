@@ -69,24 +69,23 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
-                    // This uses the token stored in Jenkins credentials
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=$SONAR_PROJECT \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.login=$SONAR_TOKEN
-                        '''
-                    }
+                    sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=$SONAR_PROJECT \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=student \
+                          -Dsonar.password=Imccstudent@2025
+                    '''
                 }
             }
+        }
         }
 
         stage('Login & Push to Nexus') {
             steps {
                 container('dind') {
                     sh 'sleep 10'
-                    // Using the Nexus credentials you provided
+                    // Using the exact credentials you provided
                     sh 'docker login $REGISTRY_URL -u student -p Imcc@2025'
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
