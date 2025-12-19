@@ -100,23 +100,17 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                        # 1. Re-create the secret in YOUR namespace so Nodes can pull
-                        kubectl delete secret nexus-secret -n $NAMESPACE --ignore-not-found
-                        kubectl create secret docker-registry nexus-secret \
-                          --docker-server=nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 \
-                          --docker-username=admin \
-                          --docker-password=Changeme@2025 \
-                          -n $NAMESPACE
-
-                        # 2. Apply manifests
+                        # 1. Apply the YAML changes (Service, Ingress, etc.)
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
+
+                        # 2. THE HARD RESET: Forcefully delete all pods in your namespace
+                        # This causes Kubernetes to immediately start a fresh one using your new image.
+                        kubectl delete pods --all -n $NAMESPACE --force --grace-period=0
                         
-                        # 3. Force restart to clear the old errors
-                        kubectl rollout restart deployment/nutrition-analyzer-deployment -n $NAMESPACE
-                        echo "--- Waiting for Pod to start ---"
-                        sleep 40
+                        echo "--- Fresh Pods Starting ---"
+                        sleep 30
                         kubectl get pods -n $NAMESPACE
                     '''
                 }
