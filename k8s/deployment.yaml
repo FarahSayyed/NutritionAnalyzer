@@ -1,1 +1,33 @@
-#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nutrition-analyzer-deployment
+  namespace: "2401178-nutritionanalyzer"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nutrition-analyzer
+  template:
+    metadata:
+      labels:
+        app: nutrition-analyzer
+    spec:
+      imagePullSecrets:
+        - name: nexus-secret
+      containers:
+        - name: nutrition-analyzer
+          # This points to your image in the college Nexus registry
+          image: nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/student-projects/nutrition-analyzer:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DEBUG
+              value: "1"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
