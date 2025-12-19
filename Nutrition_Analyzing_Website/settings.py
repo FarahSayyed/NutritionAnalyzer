@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-xyt7np_qw0l8=jm*7t-42u%k@zflse(y+$3et#!qrrte+z(@-%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -80,13 +80,8 @@ SESSION_COOKIE_AGE = 3600  # 1 hour (time before session expires)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nutrition_db', #mysql database 
-        'USER':'root', #mysql username 
-        'PASSWORD':'Saloni@123',
-        'HOST':'localhost',
-        'PORT':'3306', 
-        
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
