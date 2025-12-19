@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from accounts.models import user  # Import the User model from the accounts app
+from accounts.models import User  # Import the User model from the accounts app
 from django.views.decorators.cache import never_cache
 
 # Create your views here.
