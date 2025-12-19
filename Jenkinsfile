@@ -52,6 +52,7 @@ spec:
         REGISTRY_REPO   = "student-projects" 
         SONAR_PROJECT   = "nutrition-analyzer-key"
         SONAR_HOST_URL  = "http://my-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000"
+        NAMESPACE       = "2401178-nutritionanalyzer"
     }
 
     stages {
@@ -84,7 +85,8 @@ spec:
             steps {
                 container('dind') {
                     sh 'sleep 10'
-                    sh 'docker login $REGISTRY_URL -u student -p Imcc@2025'
+                    // We are trying the provided Nexus password again
+                    sh "docker login $REGISTRY_URL -u student -p Imcc@2025"
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
                         docker push $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
@@ -100,9 +102,9 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- Checking if Pods are running ---"
-                        sleep 10
-                        kubectl get pods -n 2401178-nutritionanalyzer
+                        echo "--- VERIFYING DEPLOYMENT ---"
+                        sleep 15
+                        kubectl get pods -n $NAMESPACE
                     '''
                 }
             }
