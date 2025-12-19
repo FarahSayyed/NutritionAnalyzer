@@ -100,6 +100,9 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
+                        echo "--- Checking if Pods are running ---"
+                        sleep 10
+                        kubectl get pods -n 2401178-nutritionanalyzer
                     '''
                 }
             }
