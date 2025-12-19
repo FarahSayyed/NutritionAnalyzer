@@ -59,10 +59,8 @@ spec:
         stage('Build Docker Image') {
             steps {
                 container('dind') {
-                    sh '''
-                        sleep 20
-                        docker build -t $APP_NAME:$IMAGE_TAG .
-                    '''
+                    sh 'sleep 20'
+                    sh "docker build -t $APP_NAME:$IMAGE_TAG ."
                 }
             }
         }
@@ -100,17 +98,24 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                        # 1. Apply the YAML changes (Service, Ingress, etc.)
+                        # 1. DELETE THE OLD SECRET AND RE-CREATE IT FRESH
+                        kubectl delete secret nexus-secret -n $NAMESPACE --ignore-not-found
+                        kubectl create secret docker-registry nexus-secret \
+                          --docker-server=nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 \
+                          --docker-username=admin \
+                          --docker-password=Changeme@2025 \
+                          -n $NAMESPACE
+
+                        # 2. APPLY MANIFESTS
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-
-                        # 2. THE HARD RESET: Forcefully delete all pods in your namespace
-                        # This causes Kubernetes to immediately start a fresh one using your new image.
+                        
+                        # 3. CLEAN UP ALL OLD FAILING PODS
                         kubectl delete pods --all -n $NAMESPACE --force --grace-period=0
                         
-                        echo "--- Fresh Pods Starting ---"
-                        sleep 30
+                        echo "--- Waiting for cluster to pull the image ---"
+                        sleep 40
                         kubectl get pods -n $NAMESPACE
                     '''
                 }
