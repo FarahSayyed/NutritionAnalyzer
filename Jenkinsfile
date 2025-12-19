@@ -109,8 +109,9 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- VERIFYING POD STATUS ---"
-                        sleep 15
+                        echo "--- REFRESHING DEPLOYMENT ---"
+                        kubectl rollout restart deployment/nutrition-analyzer-deployment -n $NAMESPACE
+                        sleep 20
                         kubectl get pods -n $NAMESPACE
                     '''
                 }
