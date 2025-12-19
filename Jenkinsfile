@@ -106,12 +106,20 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
+                        # One-time fix to ensure Kubernetes can pull your image
+                        kubectl create secret docker-registry nexus-secret \
+                          --docker-server=$REGISTRY_URL \
+                          --docker-username=admin \
+                          --docker-password=Changeme@2025 \
+                          --namespace=$NAMESPACE || echo "Secret already exists"
+
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
+                        
                         echo "--- REFRESHING DEPLOYMENT ---"
                         kubectl rollout restart deployment/nutrition-analyzer-deployment -n $NAMESPACE
-                        sleep 20
+                        sleep 30
                         kubectl get pods -n $NAMESPACE
                     '''
                 }
