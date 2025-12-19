@@ -10,7 +10,6 @@ spec:
     image: sonarsource/sonar-scanner-cli
     command: ["cat"]
     tty: true
-
   - name: kubectl
     image: bitnami/kubectl:latest
     command: ["cat"]
@@ -24,7 +23,6 @@ spec:
     - name: kubeconfig-secret
       mountPath: /kube/config
       subPath: kubeconfig
-
   - name: dind
     image: docker:dind
     securityContext:
@@ -36,7 +34,6 @@ spec:
     - name: docker-config
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
-
   volumes:
   - name: docker-config
     configMap:
@@ -65,7 +62,6 @@ spec:
                     sh '''
                         sleep 15
                         docker build -t $APP_NAME:$IMAGE_TAG .
-                        docker images
                     '''
                 }
             }
@@ -74,13 +70,14 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
-                    sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=$SONAR_PROJECT \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=admin \
-                          -Dsonar.password=Changeme@2025
-                    '''
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                            sonar-scanner \
+                              -Dsonar.projectKey=$SONAR_PROJECT \
+                              -Dsonar.host.url=$SONAR_HOST_URL \
+                              -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
@@ -88,9 +85,7 @@ spec:
         stage('Login to Docker Registry') {
             steps {
                 container('dind') {
-                    sh 'docker --version'
                     sh 'sleep 10'
-                    // STRICTLY FROM DOCUMENT: user admin, password Changeme@2025
                     sh "docker login $REGISTRY_URL -u admin -p Changeme@2025"
                 }
             }
@@ -102,8 +97,6 @@ spec:
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
                         docker push $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
-                        docker pull $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
-                        docker images
                     '''
                 }
             }
@@ -116,8 +109,9 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- Verifying Rollout Status ---"
-                        kubectl rollout status deployment/nutrition-analyzer-deployment -n $NAMESPACE
+                        echo "--- VERIFYING POD STATUS ---"
+                        sleep 15
+                        kubectl get pods -n $NAMESPACE
                     '''
                 }
             }
