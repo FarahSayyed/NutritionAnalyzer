@@ -59,7 +59,10 @@ spec:
         stage('Build Docker Image') {
             steps {
                 container('dind') {
-                    sh "docker build -t $APP_NAME:$IMAGE_TAG ."
+                    sh '''
+                        sleep 20
+                        docker build -t $APP_NAME:$IMAGE_TAG .
+                    '''
                 }
             }
         }
