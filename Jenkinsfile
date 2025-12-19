@@ -74,15 +74,13 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
-                    // Using the standard credential-based analysis from the guide
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=$SONAR_PROJECT \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.login=$SONAR_TOKEN
-                        '''
-                    }
+                    sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=$SONAR_PROJECT \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=admin \
+                          -Dsonar.password=Changeme@2025
+                    '''
                 }
             }
         }
