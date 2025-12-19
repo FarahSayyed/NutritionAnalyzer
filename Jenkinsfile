@@ -98,23 +98,21 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                        # 1. DELETE THE OLD SECRET AND RE-CREATE IT FRESH
+                        # Match the secret to the address used in deployment.yaml
                         kubectl delete secret nexus-secret -n $NAMESPACE --ignore-not-found
                         kubectl create secret docker-registry nexus-secret \
-                          --docker-server=nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 \
+                          --docker-server=127.0.0.1:30085 \
                           --docker-username=admin \
                           --docker-password=Changeme@2025 \
                           -n $NAMESPACE
 
-                        # 2. APPLY MANIFESTS
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
                         
-                        # 3. CLEAN UP ALL OLD FAILING PODS
                         kubectl delete pods --all -n $NAMESPACE --force --grace-period=0
                         
-                        echo "--- Waiting for cluster to pull the image ---"
+                        echo "--- Waiting for node to pull from local port ---"
                         sleep 40
                         kubectl get pods -n $NAMESPACE
                     '''
