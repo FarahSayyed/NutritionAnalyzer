@@ -59,10 +59,7 @@ spec:
         stage('Build Docker Image') {
             steps {
                 container('dind') {
-                    sh '''
-                        sleep 15
-                        docker build -t $APP_NAME:$IMAGE_TAG .
-                    '''
+                    sh "docker build -t $APP_NAME:$IMAGE_TAG ."
                 }
             }
         }
@@ -71,12 +68,7 @@ spec:
             steps {
                 container('sonar-scanner') {
                     withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=$SONAR_PROJECT \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.login=$SONAR_TOKEN
-                        '''
+                        sh "sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN"
                     }
                 }
             }
@@ -85,7 +77,6 @@ spec:
         stage('Login to Docker Registry') {
             steps {
                 container('dind') {
-                    sh 'sleep 10'
                     sh "docker login $REGISTRY_URL -u admin -p Changeme@2025"
                 }
             }
@@ -106,20 +97,23 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                        # One-time fix to ensure Kubernetes can pull your image
+                        # 1. Re-create the secret in YOUR namespace so Nodes can pull
+                        kubectl delete secret nexus-secret -n $NAMESPACE --ignore-not-found
                         kubectl create secret docker-registry nexus-secret \
-                          --docker-server=$REGISTRY_URL \
+                          --docker-server=nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 \
                           --docker-username=admin \
                           --docker-password=Changeme@2025 \
-                          --namespace=$NAMESPACE || echo "Secret already exists"
+                          -n $NAMESPACE
 
+                        # 2. Apply manifests
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
                         
-                        echo "--- REFRESHING DEPLOYMENT ---"
+                        # 3. Force restart to clear the old errors
                         kubectl rollout restart deployment/nutrition-analyzer-deployment -n $NAMESPACE
-                        sleep 30
+                        echo "--- Waiting for Pod to start ---"
+                        sleep 40
                         kubectl get pods -n $NAMESPACE
                     '''
                 }
