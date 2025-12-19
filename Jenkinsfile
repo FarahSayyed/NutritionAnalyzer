@@ -86,7 +86,7 @@ spec:
                 container('dind') {
                     sh 'sleep 10'
                     // We are trying the provided Nexus password again
-                    sh "docker login $REGISTRY_URL -u student -p Imcc@2025"
+                    sh "docker login $REGISTRY_URL -u student -p Changeme@2025"
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
                         docker push $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
