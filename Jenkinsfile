@@ -70,6 +70,7 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
+                    // Using the SonarQube credentials you provided
                     sh '''
                         sonar-scanner \
                           -Dsonar.projectKey=$SONAR_PROJECT \
@@ -81,12 +82,19 @@ spec:
             }
         }
 
-        stage('Login & Push to Nexus') {
+        stage('Login to Docker Registry') {
             steps {
                 container('dind') {
                     sh 'sleep 10'
-                    // We are trying the provided Nexus password again
-                    sh "docker login $REGISTRY_URL -u student -p Changeme@2025"
+                    // Correcting the username to 'student' and using your Nexus password
+                    sh "docker login $REGISTRY_URL -u student -p Imcc@2025"
+                }
+            }
+        }
+
+        stage('Build - Tag - Push Image') {
+            steps {
+                container('dind') {
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
                         docker push $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
@@ -95,14 +103,14 @@ spec:
             }
         }
 
-        stage('Deploy to K8s') {
+        stage('Deploy Application') {
             steps {
                 container('kubectl') {
                     sh '''
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- VERIFYING DEPLOYMENT ---"
+                        echo "--- VERIFYING POD STATUS ---"
                         sleep 15
                         kubectl get pods -n $NAMESPACE
                     '''
