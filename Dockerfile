@@ -24,4 +24,4 @@ EXPOSE 8000
 
 # Start the app
 # Ensure 'Nutrition_Analyzing_Website' matches the folder name where settings.py and wsgi.py live
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Nutrition_Analyzing_Website.wsgi:application"]
+CMD ["gunicorn", "Nutrition_Analyzing_Website.wsgi:application", "--bind", "0.0.0.0:8000", "--chdir", "/app"]
