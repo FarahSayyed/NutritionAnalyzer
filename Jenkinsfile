@@ -10,6 +10,7 @@ spec:
     image: sonarsource/sonar-scanner-cli
     command: ["cat"]
     tty: true
+
   - name: kubectl
     image: bitnami/kubectl:latest
     command: ["cat"]
@@ -23,6 +24,7 @@ spec:
     - name: kubeconfig-secret
       mountPath: /kube/config
       subPath: kubeconfig
+
   - name: dind
     image: docker:dind
     securityContext:
@@ -34,6 +36,7 @@ spec:
     - name: docker-config
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
+
   volumes:
   - name: docker-config
     configMap:
@@ -62,6 +65,7 @@ spec:
                     sh '''
                         sleep 15
                         docker build -t $APP_NAME:$IMAGE_TAG .
+                        docker images
                     '''
                 }
             }
@@ -70,8 +74,7 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
-                    // Reverting to document standard for analysis
-                    // If Token ID is missing in Jenkins, we use the fallback in the next stage
+                    // Using the standard credential-based analysis from the guide
                     withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
                         sh '''
                             sonar-scanner \
@@ -87,9 +90,10 @@ spec:
         stage('Login to Docker Registry') {
             steps {
                 container('dind') {
+                    sh 'docker --version'
                     sh 'sleep 10'
-                    // STRICTLY FROM REFERENCE DOCUMENT
-                    sh 'docker login nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 -u admin -p Changeme@2025'
+                    // STRICTLY FROM DOCUMENT: user admin, password Changeme@2025
+                    sh "docker login $REGISTRY_URL -u admin -p Changeme@2025"
                 }
             }
         }
@@ -100,6 +104,8 @@ spec:
                     sh '''
                         docker tag $APP_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
                         docker push $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
+                        docker pull $REGISTRY_URL/$REGISTRY_REPO/$APP_NAME:$IMAGE_TAG
+                        docker images
                     '''
                 }
             }
@@ -112,9 +118,8 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- VERIFYING DEPLOYMENT ---"
-                        sleep 15
-                        kubectl get pods -n $NAMESPACE
+                        echo "--- Verifying Rollout Status ---"
+                        kubectl rollout status deployment/nutrition-analyzer-deployment -n $NAMESPACE
                     '''
                 }
             }
