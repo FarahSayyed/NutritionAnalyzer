@@ -70,14 +70,16 @@ spec:
         stage('SonarQube Analysis') {
             steps {
                 container('sonar-scanner') {
-                    // Using the SonarQube credentials you provided
-                    sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=$SONAR_PROJECT \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=student \
-                          -Dsonar.password=Imccstudent@2025
-                    '''
+                    // Reverting to document standard for analysis
+                    // If Token ID is missing in Jenkins, we use the fallback in the next stage
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN_ID', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                            sonar-scanner \
+                              -Dsonar.projectKey=$SONAR_PROJECT \
+                              -Dsonar.host.url=$SONAR_HOST_URL \
+                              -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
@@ -86,8 +88,8 @@ spec:
             steps {
                 container('dind') {
                     sh 'sleep 10'
-                    // Correcting the username to 'student' and using your Nexus password
-                    sh "docker login $REGISTRY_URL -u student -p Imcc@2025"
+                    // STRICTLY FROM REFERENCE DOCUMENT
+                    sh 'docker login nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 -u admin -p Changeme@2025'
                 }
             }
         }
@@ -110,7 +112,7 @@ spec:
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        echo "--- VERIFYING POD STATUS ---"
+                        echo "--- VERIFYING DEPLOYMENT ---"
                         sleep 15
                         kubectl get pods -n $NAMESPACE
                     '''
